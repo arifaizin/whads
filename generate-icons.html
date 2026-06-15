@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Whads Icons</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #25D366;
+        }
+        .icon-preview {
+            display: flex;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .icon-box {
+            text-align: center;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+        button {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #128C7E;
+        }
+        .instructions {
+            background: #f0f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Whads Icon Generator</h1>
+        <p>Generate app icons for the Whads PWA application.</p>
+        
+        <div class="icon-preview">
+            <div class="icon-box">
+                <h3>192x192</h3>
+                <canvas id="icon192" width="192" height="192"></canvas>
+                <br>
+                <button onclick="downloadIcon('icon192', 'icon-192.png')">Download</button>
+            </div>
+            <div class="icon-box">
+                <h3>512x512</h3>
+                <canvas id="icon512" width="512" height="512"></canvas>
+                <br>
+                <button onclick="downloadIcon('icon512', 'icon-512.png')">Download</button>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>📝 Instructions:</h3>
+            <ol>
+                <li>Click the "Download" button under each icon</li>
+                <li>Save the files to the <code>whads/icons/</code> directory</li>
+                <li>Make sure the filenames match: <code>icon-192.png</code> and <code>icon-512.png</code></li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function drawIcon(canvas) {
+            const ctx = canvas.getContext('2d');
+            const size = canvas.width;
+            const padding = size * 0.15;
+            
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#25D366');
+            gradient.addColorStop(1, '#128C7E');
+            
+            // Draw rounded rectangle background
+            const radius = size * 0.2;
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(size - radius, 0);
+            ctx.quadraticCurveTo(size, 0, size, radius);
+            ctx.lineTo(size, size - radius);
+            ctx.quadraticCurveTo(size, size, size - radius, size);
+            ctx.lineTo(radius, size);
+            ctx.quadraticCurveTo(0, size, 0, size - radius);
+            ctx.lineTo(0, radius);
+            ctx.quadraticCurveTo(0, 0, radius, 0);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw WhatsApp-style icon
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = size * 0.02;
+            
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const iconSize = size - (padding * 2);
+            const scale = iconSize / 24;
+            
+            // Draw phone with chat bubble
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.scale(scale, scale);
+            
+            // WhatsApp logo path
+            ctx.beginPath();
+            ctx.arc(0, 0, 9.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Inner circle (phone)
+            ctx.fillStyle = '#25D366';
+            ctx.beginPath();
+            ctx.arc(0, 0, 7.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Phone receiver
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 0.8;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            // Draw simplified phone icon
+            ctx.beginPath();
+            ctx.moveTo(-3, -2);
+            ctx.bezierCurveTo(-3.5, -2.5, -3.5, -3, -3, -3.5);
+            ctx.lineTo(-1.5, -2);
+            ctx.bezierCurveTo(-1, -1.5, -0.5, -1.5, 0, -2);
+            ctx.lineTo(2, -4);
+            ctx.bezierCurveTo(2.5, -4.5, 3, -4.5, 3.5, -4);
+            ctx.lineTo(4, -3.5);
+            ctx.bezierCurveTo(4.5, -3, 4.5, -2.5, 4, -2);
+            ctx.lineTo(2, 0);
+            ctx.bezierCurveTo(1.5, 0.5, 1.5, 1, 2, 1.5);
+            ctx.lineTo(3.5, 3);
+            ctx.bezierCurveTo(4, 3.5, 4, 4, 3.5, 4.5);
+            ctx.lineTo(3, 5);
+            ctx.bezierCurveTo(2.5, 5.5, 2, 5.5, 1.5, 5);
+            ctx.lineTo(-0.5, 3);
+            ctx.bezierCurveTo(-1, 2.5, -1.5, 2.5, -2, 3);
+            ctx.lineTo(-3.5, 4.5);
+            ctx.bezierCurveTo(-4, 5, -4.5, 5, -5, 4.5);
+            ctx.lineTo(-5.5, 4);
+            ctx.bezierCurveTo(-6, 3.5, -6, 3, -5.5, 2.5);
+            ctx.lineTo(-4, 1);
+            ctx.bezierCurveTo(-3.5, 0.5, -3.5, 0, -4, -0.5);
+            ctx.lineTo(-5, -1.5);
+            ctx.bezierCurveTo(-5.5, -2, -5.5, -2.5, -5, -3);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.restore();
+            
+            // Add "W" letter
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size * 0.35}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('W', centerX, centerY);
+        }
+        
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Generate icons on load
+        window.onload = function() {
+            drawIcon(document.getElementById('icon192'));
+            drawIcon(document.getElementById('icon512'));
+        };
+    </script>
+</body>
+</html>

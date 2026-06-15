@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Phone Number Formatting - Whads</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #25D366;
+        }
+        .test-case {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #25D366;
+        }
+        .test-case.pass {
+            border-left-color: #4CAF50;
+            background: #f1f8f4;
+        }
+        .test-case.fail {
+            border-left-color: #f44336;
+            background: #fef1f0;
+        }
+        .input {
+            font-weight: bold;
+            color: #333;
+        }
+        .output {
+            color: #666;
+            margin-top: 5px;
+        }
+        .expected {
+            color: #999;
+            font-size: 14px;
+        }
+        .status {
+            float: right;
+            font-weight: bold;
+        }
+        .pass .status {
+            color: #4CAF50;
+        }
+        .fail .status {
+            color: #f44336;
+        }
+        button {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #128C7E;
+        }
+        .summary {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .summary h2 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Phone Number Formatting</h1>
+        <p>Testing the phone number formatting logic used in Whads application.</p>
+        
+        <button onclick="runTests()">Run Tests</button>
+        
+        <div id="results"></div>
+        <div id="summary"></div>
+    </div>
+
+    <script>
+        // Copy the exact formatting function from index.html
+        function formatPhoneNumber(phone) {
+            phone = phone.replace(/[\s\-\(\)]/g, '');
+            if (phone.startsWith('08')) {
+                return '+628' + phone.substring(2);
+            } else if (phone.startsWith('+628')) {
+                return phone;
+            } else if (phone.startsWith('628')) {
+                return '+' + phone;
+            } else if (phone.startsWith('8')) {
+                return '+62' + phone;
+            }
+            return null;
+        }
+
+        function validatePhoneNumber(phone) {
+            const formatted = formatPhoneNumber(phone);
+            if (!formatted) return false;
+            const digits = formatted.replace(/\D/g, '');
+            return digits.length >= 11 && digits.length <= 15;
+        }
+
+        const testCases = [
+            { input: '08123456789', expected: '+628123456789', description: 'Format 08xxx' },
+            { input: '+628123456789', expected: '+628123456789', description: 'Format +628xxx (already correct)' },
+            { input: '628123456789', expected: '+628123456789', description: 'Format 628xxx' },
+            { input: '8123456789', expected: '+628123456789', description: 'Format 8xxx' },
+            { input: '0812-3456-789', expected: '+628123456789', description: 'Format with dashes' },
+            { input: '0812 3456 789', expected: '+628123456789', description: 'Format with spaces' },
+            { input: '0812-3456 789', expected: '+628123456789', description: 'Format with mixed separators' },
+            { input: '(0812) 3456-789', expected: '+628123456789', description: 'Format with parentheses' },
+            { input: '081234567890', expected: '+6281234567890', description: 'Longer number (12 digits)' },
+            { input: '0812345678', expected: '+62812345678', description: 'Shorter number (10 digits)' },
+            { input: '  08123456789  ', expected: '+628123456789', description: 'With leading/trailing spaces' },
+            { input: '0857-1234-5678', expected: '+628571234567', description: 'Different operator (0857)' },
+            { input: '0821 9876 5432', expected: '+628219876543', description: 'Different operator (0821)' },
+        ];
+
+        function runTests() {
+            const resultsDiv = document.getElementById('results');
+            const summaryDiv = document.getElementById('summary');
+            resultsDiv.innerHTML = '';
+            
+            let passed = 0;
+            let failed = 0;
+
+            testCases.forEach((test, index) => {
+                const result = formatPhoneNumber(test.input);
+                const isValid = validatePhoneNumber(test.input);
+                const isPassed = result === test.expected && isValid;
+                
+                if (isPassed) passed++;
+                else failed++;
+
+                const testDiv = document.createElement('div');
+                testDiv.className = `test-case ${isPassed ? 'pass' : 'fail'}`;
+                testDiv.innerHTML = `
+                    <span class="status">${isPassed ? '✓ PASS' : '✗ FAIL'}</span>
+                    <div><strong>Test ${index + 1}:</strong> ${test.description}</div>
+                    <div class="input">Input: "${test.input}"</div>
+                    <div class="output">Output: "${result || 'null'}"</div>
+                    <div class="expected">Expected: "${test.expected}"</div>
+                    <div class="expected">Valid: ${isValid ? 'Yes' : 'No'}</div>
+                `;
+                resultsDiv.appendChild(testDiv);
+            });
+
+            const total = testCases.length;
+            const percentage = ((passed / total) * 100).toFixed(1);
+            
+            summaryDiv.innerHTML = `
+                <div class="summary">
+                    <h2>Test Summary</h2>
+                    <p><strong>${passed}</strong> passed, <strong>${failed}</strong> failed out of <strong>${total}</strong> tests</p>
+                    <p>Success Rate: <strong>${percentage}%</strong></p>
+                </div>
+            `;
+        }
+
+        // Run tests automatically on load
+        window.onload = runTests;
+    </script>
+</body>
+</html>
