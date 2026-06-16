@@ -6,8 +6,8 @@
     <meta name="description" content="Whads - Kirim pesan WhatsApp tanpa simpan nomor">
     <meta name="theme-color" content="#25D366">
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/svg+xml" href="icons/icon-192.svg">
-    <link rel="apple-touch-icon" href="icons/icon-192.svg">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
     <title>Whads - WhatsApp Direct Send</title>
     <style>
         * {
@@ -197,6 +197,94 @@
             width: 24px;
             height: 24px;
         }
+        /* Mobile PWA Install Popup */
+        .mobile-install-popup {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+            z-index: 1000;
+            border-radius: 20px 20px 0 0;
+        }
+        .mobile-install-popup.show {
+            transform: translateY(0);
+        }
+        .mobile-install-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .mobile-install-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            flex-shrink: 0;
+        }
+        .mobile-install-text {
+            flex: 1;
+        }
+        .mobile-install-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .mobile-install-subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+        .mobile-install-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .mobile-install-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mobile-install-btn.primary {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+        }
+        .mobile-install-btn.secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+        .mobile-install-btn:active {
+            transform: scale(0.98);
+        }
+        .mobile-install-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 999;
+        }
+        .mobile-install-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
         @media (max-width: 480px) {
             .container { padding: 30px 20px; }
             h1 { font-size: 24px; }
@@ -206,6 +294,22 @@
     </style>
 </head>
 <body>
+    <!-- Mobile Install Popup -->
+    <div id="mobileInstallOverlay" class="mobile-install-overlay"></div>
+    <div id="mobileInstallPopup" class="mobile-install-popup">
+        <div class="mobile-install-content">
+            <div class="mobile-install-icon">📱</div>
+            <div class="mobile-install-text">
+                <div class="mobile-install-title">Install Whads!</div>
+                <div class="mobile-install-subtitle">Akses lebih cepat dari home screen</div>
+            </div>
+        </div>
+        <div class="mobile-install-buttons">
+            <button id="mobileInstallBtn" class="mobile-install-btn primary">Install Sekarang</button>
+            <button id="mobileCloseBtn" class="mobile-install-btn secondary">Nanti Saja</button>
+        </div>
+    </div>
+
     <div class="container">
         <div id="installPrompt" class="install-prompt">
             <div class="install-prompt-text">📱 Install Whads untuk akses lebih cepat!</div>
@@ -249,6 +353,30 @@
         const installPrompt = document.getElementById('installPrompt');
         const installButton = document.getElementById('installButton');
         const closePrompt = document.getElementById('closePrompt');
+        
+        // Mobile install popup elements
+        const mobileInstallPopup = document.getElementById('mobileInstallPopup');
+        const mobileInstallOverlay = document.getElementById('mobileInstallOverlay');
+        const mobileInstallBtn = document.getElementById('mobileInstallBtn');
+        const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+
+        // Detect if device is mobile
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+                || (window.innerWidth <= 768);
+        }
+
+        // Show mobile install popup
+        function showMobileInstallPopup() {
+            mobileInstallOverlay.classList.add('show');
+            mobileInstallPopup.classList.add('show');
+        }
+
+        // Hide mobile install popup
+        function hideMobileInstallPopup() {
+            mobileInstallOverlay.classList.remove('show');
+            mobileInstallPopup.classList.remove('show');
+        }
 
         function formatPhoneNumber(phone) {
             phone = phone.replace(/[\s\-\(\)]/g, '');
@@ -305,12 +433,25 @@
             window.open(url, '_blank');
         });
 
+        // Handle PWA install prompt
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            installPrompt.classList.add('show');
+            
+            // Show mobile popup for mobile devices, desktop prompt for desktop
+            if (isMobileDevice()) {
+                // Show mobile popup after a short delay
+                setTimeout(() => {
+                    if (deferredPrompt && !localStorage.getItem('installPromptDismissed')) {
+                        showMobileInstallPopup();
+                    }
+                }, 2000);
+            } else {
+                installPrompt.classList.add('show');
+            }
         });
 
+        // Desktop install button
         installButton.addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
@@ -324,6 +465,33 @@
             installPrompt.classList.remove('show');
         });
 
+        // Mobile install button
+        mobileInstallBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response: ${outcome}`);
+                deferredPrompt = null;
+                hideMobileInstallPopup();
+                if (outcome === 'accepted') {
+                    localStorage.setItem('installPromptDismissed', 'true');
+                }
+            }
+        });
+
+        // Mobile close button
+        mobileCloseBtn.addEventListener('click', () => {
+            hideMobileInstallPopup();
+            localStorage.setItem('installPromptDismissed', 'true');
+        });
+
+        // Close on overlay click
+        mobileInstallOverlay.addEventListener('click', () => {
+            hideMobileInstallPopup();
+            localStorage.setItem('installPromptDismissed', 'true');
+        });
+
+        // Register service worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('service-worker.js').catch(() => {});
         }
