@@ -6,6 +6,18 @@
       <stop offset="100%" style="stop-color:#128C7E;stop-opacity:1" />
     </linearGradient>
   </defs>
-  <rect width="192" height="192" rx="38.400000000000006" fill="url(#grad)"/>
-  <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="96" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="central">W</text>
+  <rect width="192" height="192" rx="38.4" fill="url(#grad)"/>
+  
+  <!-- Chat bubble icon -->
+  <g transform="translate(96, 96)">
+    <!-- Bubble body -->
+    <rect x="-35" y="-35" width="70" height="70" rx="12" fill="white"/>
+    <!-- Bubble tail -->
+    <path d="M -35 25 L -35 35 L -25 25 Z" fill="white"/>
+    
+    <!-- Three dots -->
+    <circle cx="-18" cy="0" r="5" fill="#25D366"/>
+    <circle cx="0" cy="0" r="5" fill="#25D366"/>
+    <circle cx="18" cy="0" r="5" fill="#25D366"/>
+  </g>
 </svg>
